@@ -1,3 +1,4 @@
-test
-text-recog-env
-data
+test/
+text-recog-env/
+data/
+.ipynb_checkpoints/
