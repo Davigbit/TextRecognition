@@ -2,3 +2,4 @@ test/
 text-recog-env/
 data/
 .ipynb_checkpoints/
+__pycache__
