@@ -48,7 +48,7 @@ def generate_letters(target_dir, image_path, letters_size):
             resized_letter = cv2.resize(letter, letters_size, interpolation=cv2.INTER_AREA)
 
             # Save resized letter
-            output_path = os.path.join(target_dir, f"letter_{n}.png")
+            output_path = os.path.join(target_dir, f"letter_{n:04d}.png")
             cv2.imwrite(output_path, resized_letter)
             n += 1
 
