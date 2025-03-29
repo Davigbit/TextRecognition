@@ -1,8 +1,6 @@
 import cv2
 import os
 from pathlib import Path
-import numpy as np
-from concurrent.futures import ThreadPoolExecutor
 
 def clean_dir(path):
     """Recursively delete files in a directory."""
@@ -21,18 +19,14 @@ def pre_process_image(image):
     # Apply thresholding to create a binary image since findContours only works with binary
     binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
 
-    # Removes noise
-    kernel = np.ones((3, 3), np.uint8)
-    binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
-
     return binary
 
-def process_letter(contour, image, letters_size, target_dir, index):
+def process_letter(contour, image, letters_size, target_dir, index_counter):
     """Extract, resize, and save a letter image."""
     x, y, w, h = cv2.boundingRect(contour)
 
     # Ignore small contours (filtering noise)
-    if w > 5 and h > 10:
+    if w > image.shape[1] * 0.05 and h > image.shape[0] * 0.1:
         pad_w, pad_h = int(w * 0.1), int(h * 0.1)
 
         # Define new bounding box with padding
@@ -46,8 +40,9 @@ def process_letter(contour, image, letters_size, target_dir, index):
         resized_letter = cv2.resize(letter, letters_size, interpolation=cv2.INTER_AREA)
 
         # Save image
-        output_path = os.path.join(target_dir, f"letter_{index:04d}.png")
-        cv2.imwrite(output_path, resized_letter)
+        output_path = os.path.join(target_dir, f"letter_{index_counter[0]:04d}.png")
+        if cv2.imwrite(output_path, resized_letter):
+            index_counter[0] += 1
 
 def generate_letters(target_dir, image_path, letters_size):
     """Detect letters, extract them, and save resized versions."""
@@ -66,7 +61,8 @@ def generate_letters(target_dir, image_path, letters_size):
     # Create output directory
     os.makedirs(target_dir, exist_ok=True)
 
+    index_counter = [0]
+
     # Process each detected letter in parallel
-    with ThreadPoolExecutor() as executor:
-        for i, contour in enumerate(contours):
-            executor.submit(process_letter, contour, image, letters_size, target_dir, i)
+    for i, contour in enumerate(contours):
+        process_letter(contour, image, letters_size, target_dir, index_counter)

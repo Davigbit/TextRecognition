@@ -9,7 +9,7 @@ PORT = 5000
 def select_image():
     file_path = filedialog.askopenfilename(
         title="Select an Image",
-        filetypes=(("PNG Files", "*.png"), ("JPEG Files", "*.jpg;*.jpeg"), ("All Files", "*.*"))
+        filetypes=(("PNG Files", "*.png"), ("JPG Files", "*.jpg"), ("All Files", "*.*"))
     )
     return file_path
 
