@@ -62,35 +62,42 @@ server_socket.listen(1)
 print("Server is listening")
 print("Do CTRL+C to stop the server")
 
-while True:
-    textfunc.clean_dir(dir_path)
+try:
+    while True:
+        textfunc.clean_dir(dir_path)
 
-    conn, addr = server_socket.accept()
-    print(f"Connected by {addr}")
+        conn, addr = server_socket.accept()
+        print(f"Connected by {addr}")
 
-    # Receive the image path from the client
-    image_path = conn.recv(1024).decode()
+        # Receive the image path from the client
+        image_path = conn.recv(1024).decode()
 
-    predictions = []
+        predictions = []
 
-    # Process the image and make a prediction
-    try:
-        textfunc.generate_letters(dir_path, image_path, letters_size)
+        # Process the image and make a prediction
+        try:
+            textfunc.generate_letters(dir_path, image_path, letters_size)
 
-        dir = Path(dir_path)
-        for letter in dir.iterdir():
-            image = Image.open(letter)
-            input_tensor = transform(image)
-            input_tensor = input_tensor.unsqueeze(0)  # Shape: [1, 1, 28, 28]
-            output = model(input_tensor)
-            predicted_class = str(torch.argmax(output, dim=1).item())
-            predictions.append(predicted_class)
+            dir = Path(dir_path)
+            for letter in dir.iterdir():
+                image = Image.open(letter)
+                input_tensor = transform(image)
+                input_tensor = input_tensor.unsqueeze(0)  # Shape: [1, 1, 28, 28]
+                output = model(input_tensor)
+                predicted_class = str(torch.argmax(output, dim=1).item())
+                predictions.append(predicted_class)
 
-        # Send the predicted class back to the client
-        predictions_str = ",".join(predictions)
-        conn.sendall(predictions_str.encode())
+            # Send the predicted class back to the client
+            predictions_str = ",".join(predictions)
+            conn.sendall(predictions_str.encode())
 
-    except Exception as e:
-        conn.sendall(f"Error: {e}".encode())
+        except Exception as e:
+            conn.sendall(f"Error: {e}".encode())
 
-    conn.close()
+        conn.close()
+
+except KeyboardInterrupt:
+    print("\nServer is shutting down")
+
+finally:
+    server_socket.close()
