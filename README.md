@@ -20,7 +20,7 @@
 
 ```$ python -m venv text-recog-env```
 
-```$ source text-recog-env/Script/activate```
+```$ text-recog-env/Scripts/activate```
 
 ```$ pip install -r requirements.txt```
 
@@ -32,7 +32,7 @@
 
 If tkinter is not installed: ```$ sudo apt-get install python3-tk```
 
-```$ source text-recog-env/bin/activate```
+In both terminals: ```$ source text-recog-env/bin/activate```
 
 In one terminal: ```$ python3 src/server.py```
 
@@ -40,7 +40,7 @@ In a second terminal: ```$ python3 src/client.py```
 
 #### Running server on Windows:
 
-```$ source text-recog-env/Script/activate```
+In both terminals: ```$ text-recog-env/Scripts/activate```
 
 In one terminal: ```$ python src/server.py```
 
