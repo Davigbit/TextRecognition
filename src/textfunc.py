@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 def clean_dir(path):
     """Recursively delete files in a directory."""
+    os.makedirs(path, exist_ok=True)
     directory = Path(path)
     for item in directory.iterdir():
         if item.is_dir():
