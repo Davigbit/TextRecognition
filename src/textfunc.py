@@ -53,10 +53,6 @@ def generate_letters(target_dir, image_path, letters_size):
     image = cv2.imread(image_path)
     if image is None:
         raise FileNotFoundError(f"The file \"{image_path}\" does not exist")
-    
-    # Resize image to speed up processing
-    scale_factor = 0.5
-    image = cv2.resize(image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA)
 
     binary = pre_process_image(image)
 
