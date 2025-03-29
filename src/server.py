@@ -1,3 +1,4 @@
+import socket
 import textfunc
 from pathlib import Path
 import torch
@@ -6,14 +7,10 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 from PIL import Image
 
-image_path = "test/numbers.png"
 dir_path = "test/letters_output"
 letters_size = (28, 28)
 
-textfunc.clean_dir(dir_path)
-textfunc.generate_letters(dir_path, image_path, letters_size)
-
-# Transformer from training
+# The transformer from the training process
 class InvertIfMajority:
     def __call__(self, image):
         image = image.convert("L")
@@ -21,12 +18,13 @@ class InvertIfMajority:
         if tensor_image.mean() > 0.5:
             tensor_image = 1 - tensor_image
         return tensor_image
+
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
     InvertIfMajority()
 ])
 
-# Same CNN as training
+# Define the CNN class (same as the one used for training)
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
@@ -49,21 +47,50 @@ class CNN(nn.Module):
 
 model = CNN()
 
-# Loading training weights
+# Load the model weights
 model.load_state_dict(torch.load("src/model/model_weights.pth"))
 model.eval()
 
-dir = Path(dir_path)
-for letter in dir.iterdir():
-    
-    image = Image.open(letter)
-    input_tensor = transform(image)
+# Set up the server
+HOST = '127.0.0.1'
+PORT = 5000
 
-    input_tensor = input_tensor.unsqueeze(0)  # Shape: [1, 1, 28, 28]
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind((HOST, PORT))
+server_socket.listen(1)
 
-    output = model(input_tensor)
-    predicted_class = torch.argmax(output, dim=1).item()
+print("Server is listening")
+print("Do CTRL+C to stop the server")
 
-    print(predicted_class, end="")
+while True:
+    textfunc.clean_dir(dir_path)
 
-print()
+    conn, addr = server_socket.accept()
+    print(f"Connected by {addr}")
+
+    # Receive the image path from the client
+    image_path = conn.recv(1024).decode()
+
+    predictions = []
+
+    # Process the image and make a prediction
+    try:
+        textfunc.generate_letters(dir_path, image_path, letters_size)
+
+        dir = Path(dir_path)
+        for letter in dir.iterdir():
+            image = Image.open(letter)
+            input_tensor = transform(image)
+            input_tensor = input_tensor.unsqueeze(0)  # Shape: [1, 1, 28, 28]
+            output = model(input_tensor)
+            predicted_class = str(torch.argmax(output, dim=1).item())
+            predictions.append(predicted_class)
+
+        # Send the predicted class back to the client
+        predictions_str = ",".join(predictions)
+        conn.sendall(predictions_str.encode())
+
+    except Exception as e:
+        conn.sendall(f"Error: {e}".encode())
+
+    conn.close()
