@@ -4,8 +4,8 @@ from pathlib import Path
 
 def clean_dir(path):
     """Recursively delete files in a directory."""
-    os.makedirs(path, exist_ok=True)
     directory = Path(path)
+    directory.mkdir(parents=True, exist_ok=True)
     for item in directory.iterdir():
         if item.is_dir():
             clean_dir(item)
@@ -21,12 +21,12 @@ def pre_process_image(image):
 
     return binary
 
-def process_letter(contour, image, letters_size, target_dir, index_counter):
+def process_letter(contour, image, target_dir, index_counter):
     """Extract, resize, and save a letter image."""
     x, y, w, h = cv2.boundingRect(contour)
 
     # Ignore small contours (filtering noise)
-    if w > image.shape[1] * 0.05 and h > image.shape[0] * 0.1:
+    if w > image.shape[1] * 0.025 and h > image.shape[0] * 0.05:
         pad_w, pad_h = int(w * 0.1), int(h * 0.1)
 
         # Define new bounding box with padding
@@ -36,15 +36,12 @@ def process_letter(contour, image, letters_size, target_dir, index_counter):
         # Extract letter
         letter = image[y1:y2, x1:x2]
 
-        # Resize letter
-        resized_letter = cv2.resize(letter, letters_size, interpolation=cv2.INTER_AREA)
-
         # Save image
         output_path = os.path.join(target_dir, f"letter_{index_counter[0]:04d}.png")
-        if cv2.imwrite(output_path, resized_letter):
+        if cv2.imwrite(output_path, letter):
             index_counter[0] += 1
 
-def generate_letters(target_dir, image_path, letters_size):
+def generate_letters(target_dir, image_path):
     """Detect letters, extract them, and save resized versions."""
     image = cv2.imread(image_path)
     if image is None:
@@ -55,14 +52,20 @@ def generate_letters(target_dir, image_path, letters_size):
     # Find contours
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Sort contours from left to right
-    contours = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[0])
+    # Define minimum contour size
+    MIN_WIDTH, MIN_HEIGHT = 5, 10
+
+    # Filter and sort contours from left to right
+    contours = sorted(
+        [c for c in contours if cv2.boundingRect(c)[2] > MIN_WIDTH and cv2.boundingRect(c)[3] > MIN_HEIGHT],
+        key=lambda c: cv2.boundingRect(c)[0]
+    )
 
     # Create output directory
-    os.makedirs(target_dir, exist_ok=True)
+    Path(target_dir).mkdir(parents=True, exist_ok=True)
 
     index_counter = [0]
 
-    # Process each detected letter in parallel
+    # Process each detected letter
     for i, contour in enumerate(contours):
-        process_letter(contour, image, letters_size, target_dir, index_counter)
+        process_letter(contour, image, target_dir, index_counter)

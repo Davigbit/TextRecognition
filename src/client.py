@@ -22,21 +22,26 @@ image_path = select_image()
 
 if image_path:
     # Connect to the server
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((HOST, PORT))
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((HOST, PORT))
 
-    # Send the selected image path to the server
-    client_socket.sendall(image_path.encode())
+        # Send the selected image path to the server
+        client_socket.sendall(image_path.encode())
+    
 
-    # Receive the predictions from the server
-    predictions_str = client_socket.recv(1024).decode()
+        # Receive the predictions from the server
+        predictions_str = client_socket.recv(1024).decode()
 
-    # Split the received string into individual predictions and print them
-    predictions = predictions_str.split(",")
-    for prediction in predictions:
-        print(prediction, end="")
+        # Split the received string into individual predictions and print them
+        predictions = predictions_str.split(",")
+        for prediction in predictions:
+            print(prediction, end="")
 
-    print()
+        print()
+
+    except:
+        print("Connection error, verify server connection")
 
     client_socket.close()
 else:
