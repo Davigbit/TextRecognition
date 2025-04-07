@@ -14,7 +14,11 @@ def clean_dir(path):
 
 def pre_process_image(image):
     """Convert image to binary while removing noise."""
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Convert to grayscale if not already
+    if len(image.shape) == 3:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = image
     
     # Apply thresholding to create a binary image since findContours only works with binary
     binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
@@ -41,11 +45,10 @@ def process_letter(contour, image, target_dir, index_counter):
         if cv2.imwrite(output_path, letter):
             index_counter[0] += 1
 
-def generate_letters(target_dir, image_path):
+def generate_letters(target_dir, image):
     """Detect letters, extract them, and save resized versions."""
-    image = cv2.imread(image_path)
     if image is None:
-        raise FileNotFoundError(f"The file \"{image_path}\" does not exist")
+        raise ValueError("Received image is invalid")
 
     binary = pre_process_image(image)
 

@@ -6,3 +6,5 @@ matplotlib
 notebook
 pathlib
 tqdm
+flask
+flask-cors

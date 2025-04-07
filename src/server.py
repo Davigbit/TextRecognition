@@ -1,4 +1,5 @@
-import socket
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import textfunc
 from pathlib import Path
 import torch
@@ -7,6 +8,17 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 from PIL import Image
 import string
+import numpy as np
+import cv2
+
+app = Flask(__name__)
+CORS(app, resources={
+    r"/predict": {
+        "origins": ["http://localhost:5173"],
+        "methods": ["POST"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 dir_path = "temp/letters_output"
 letters_size = (128, 128)
@@ -50,56 +62,53 @@ model.load_state_dict(torch.load("src/model/model_weights.pth", map_location=tor
 model.eval()
 
 # Set up the server
-HOST = '127.0.0.1'
-PORT = 5000
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        # Receive the image file from the client
+        image_file = request.files['image']
+        
+        # Read the image directly with OpenCV
+        nparr = np.frombuffer(image_file.read(), np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((HOST, PORT))
-server_socket.listen(1)
+        if image is None or image.size == 0:
+            return jsonify({"error": "Invalid image received"}), 400
 
-print("Server is listening")
-print("Do CTRL+C to stop the server")
+        textfunc.clean_dir(dir_path)
+        textfunc.generate_letters(dir_path, image)
 
-try:
-    while True:
+        # Character mapping
+        CHARACTERS = list(string.digits + string.ascii_uppercase + string.ascii_lowercase)
+
+        predictions = []
+        dir = Path(dir_path)
+        for letter in dir.iterdir():
+            image = Image.open(letter)
+            input_tensor = transform(image)
+            input_tensor = input_tensor.unsqueeze(0)
+            output = model(input_tensor)
+            
+            predicted_idx = torch.argmax(output, dim=1).item()
+            predicted_char = CHARACTERS[predicted_idx]
+            predictions.append(predicted_char)
+
         textfunc.clean_dir(dir_path)
 
-        conn, addr = server_socket.accept()
-        print(f"Connected by {addr}")
+        # Create the response
+        response = {
+            "prediction": "".join(predictions)
+        }
 
-        # Receive the image path from the client
-        image_path = conn.recv(1024).decode()
+        # Send the JSON response back to the client
+        return jsonify(response)
 
-        # Process the image and make a prediction
-        try:
-            textfunc.generate_letters(dir_path, image_path)
+    except Exception as e:
+        # Error handling
+        error_response = {
+            "error": str(e)
+        }
+        return jsonify(error_response), 400
 
-            # Define the character order (must match training)
-            CHARACTERS = list(string.digits + string.ascii_uppercase + string.ascii_lowercase)
-
-            predictions = []
-            dir = Path(dir_path)
-            for letter in dir.iterdir():
-                image = Image.open(letter)
-                input_tensor = transform(image)
-                input_tensor = input_tensor.unsqueeze(0)
-                output = model(input_tensor)
-                
-                predicted_idx = torch.argmax(output, dim=1).item()
-                predicted_char = CHARACTERS[predicted_idx]  # Direct mapping
-                predictions.append(predicted_char)
-
-            # Send the predicted class back to the client
-            predictions_str = ",".join(predictions)
-            conn.sendall(predictions_str.encode())
-
-        except Exception as e:
-            conn.sendall(f"Error: {e}".encode())
-
-        conn.close()
-
-except KeyboardInterrupt:
-    print("\nServer is shutting down")
-
-finally:
-    server_socket.close()
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=5000)
