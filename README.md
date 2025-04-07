@@ -37,7 +37,7 @@
 ### Running the project:
 
 Open two terminals, one for running the server, the other for the client. 
-Also, make sure to put both terminals in the project folder.
+Also, make sure to put both terminals in the project's folder.
 
 #### - Running server on Linux or Mac:
 
