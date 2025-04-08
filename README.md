@@ -1,8 +1,16 @@
 # TextRecognition
 
-**MAIS 202 Winter 2025**
+<img align="right" height="300px" width="auto" src="https://github.com/Davigbit/TextRecognition/blob/main/text-recognition-ui/assets/demo.png">
 
-### Setting things up:
+### Team
+- Ahmad Al-Jabi: [LinkedIn](https://www.linkedin.com/in/ahmad-al-jabi/), [GitHub](https://github.com/AhmadAl-Jabi)
+- Davi Gava Bittencourt: [LinkedIn](https://www.linkedin.com/in/davigbit/), [Github](https://github.com/Davigbit)
+
+### Project Overview
+
+TextRecognition is a CNN built during the Winter 2025 edition of MAIS 202 that, as explicit by its name, recognize all alphanumerical characters.
+
+### Setting Repo and Installing Dependencies
 
 #### - Clone repo:
 
@@ -10,7 +18,7 @@
 
 ```$ cd TextRecognition```
 
-#### - Create an environment and install dependencies on Linux or Mac:
+#### - Create an environment and install server dependencies on Linux or Mac:
 
 ```$ python3 -m venv text-recog-env```
 
@@ -18,7 +26,7 @@
 
 ```$ pip install -r requirements.txt```
 
-#### - Create an environment and install dependencies on Windows:
+#### - Create an environment and install server dependencies on Windows:
 
 ```$ python -m venv text-recog-env```
 
@@ -34,10 +42,10 @@
 
 ```$ npm install --legacy-peer-deps```
 
-### Running the project:
+### Deployement
 
 Open two terminals, one for running the server, the other for the client. 
-Also, make sure to put both terminals in the project's folder.
+Also, make sure that both terminals are inside the project's folder.
 
 #### - Running server on Linux or Mac:
 
@@ -59,13 +67,13 @@ Also, make sure to put both terminals in the project's folder.
 
 Go to http://localhost:5173/
 
-#### - Opening notebook on Linux or Mac:
+#### - Opening notebooks on Linux or Mac:
 
 ```$ source text-recog-env/bin/activate```
 
 ```$ jupyter notebook```
 
-#### - Opening notebook on Windows:
+#### - Opening notebooks on Windows:
 
 ```$ text-recog-env/Scripts/activate```
 
