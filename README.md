@@ -8,7 +8,9 @@
 
 ### Project Overview
 
-TextRecognition is a CNN built during the Winter 2025 edition of MAIS 202 that, as explicit by its name, recognize all alphanumerical characters.
+TextRecognition is a CNN built during the Winter 2025 edition of MAIS 202. As its name suggest, TextRecognition is able identify all hand-written alphanumerical characters in a word. In terms of dataset, we decided to use a fraction of the NIST dataset complemented by custom data made by us using our own UI.
+
+Dataset: [Google Drive](https://drive.google.com/file/d/14M4CYBoxdYwFgq9y3jQUHPB-riL3e_3C/view?usp=sharing)
 
 ### Setting Repo and Installing Dependencies
 
