@@ -39,10 +39,10 @@ class CNN(nn.Module):
         self.fc1 = nn.Linear(64 * 32 * 32, 256)
         self.fc2 = nn.Linear(256, 256)
         self.fc3 = nn.Linear(256, 128)
-        self.fc4 = nn.Linear(128, 62)
+        self.fc4 = nn.Linear(128, 36)
         self.relu = nn.ReLU()
 
-    def forward(self, x, drop_prob=0.5):
+    def forward(self, x, drop_prob=0.3):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)  # Flatten for FC layers
@@ -79,7 +79,7 @@ def predict():
         textfunc.generate_letters(dir_path, image)
 
         # Character mapping
-        CHARACTERS = list(string.digits + string.ascii_uppercase + string.ascii_lowercase)
+        CHARACTERS = list(string.digits + string.ascii_uppercase)
 
         predictions = []
         dir = Path(dir_path)
