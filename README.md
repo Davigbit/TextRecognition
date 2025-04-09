@@ -1,6 +1,6 @@
 # TextRecognition
 
-<img align="right" height="300px" width="auto" src="https://github.com/Davigbit/TextRecognition/blob/main/text-recognition-ui/assets/demo.png">
+<img align="right" height="300px" width="auto" src="https://github.com/Davigbit/TextRecognition/blob/main/text-recognition-ui/assets/Logo.png">
 
 ### Team
 - Ahmad Al-Jabi: [LinkedIn](https://www.linkedin.com/in/ahmad-al-jabi/), [GitHub](https://github.com/AhmadAl-Jabi)
